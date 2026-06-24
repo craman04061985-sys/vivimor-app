@@ -6,7 +6,7 @@ import Stats from "./components/Stats"
 import Actions from "./components/Actions"
 import "./App.css"
 
-const API = "https://api.n8nstec.ru"
+const API = import.meta.env.VITE_API_URL || "https://api.n8nstec.ru"
 
 export default function App() {
   const [pet, setPet] = useState(null)
