@@ -14,8 +14,9 @@ export default function App() {
   const [error, setError] = useState(null)
   const [action, setAction] = useState(null)
 
-  const headers = WebApp.initData
-  ? { "x-telegram-init-data": WebApp.initData }
+  const initData = WebApp.initData
+  const headers = initData
+  ? { "x-telegram-init-data": initData }
   : { "x-telegram-user-id": "805432032" }
 
   useEffect(() => {
@@ -23,6 +24,9 @@ export default function App() {
     WebApp.ready()
     WebApp.expand()
   }
+  console.log('Telegram WebApp:', WebApp)
+  console.log('initData:', WebApp.initData)
+  console.log('initDataUnsafe:', WebApp.initDataUnsafe)
   loadPet()
   }, [])
 
