@@ -5,9 +5,12 @@ import Stats from "./components/Stats"
 import Actions from "./components/Actions"
 import "./App.css"
 
+import WebApp from "@twa-dev/sdk"
+
 const API = import.meta.env.VITE_API_URL || "https://api.n8nstec.ru"
+
 function getTG() {
-  return window.Telegram?.WebApp || null
+  return WebApp || null
 }
 
 export default function App() {
