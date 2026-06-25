@@ -7,30 +7,26 @@ import "./App.css"
 
 const API = import.meta.env.VITE_API_URL || "https://api.n8nstec.ru"
 
-function getInitData() {
-  return window.Telegram?.WebApp?.initData || null
-}
-
 function getUserId() {
-  // Пробуем window.Telegram
   const tgId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id
   if (tgId) return String(tgId)
-  
-  // Пробуем hash параметры URL
   const hash = window.location.hash.slice(1)
   const params = new URLSearchParams(hash)
   const tgWebAppData = params.get('tgWebAppData')
   if (tgWebAppData) {
-    const data = new URLSearchParams(decodeURIComponent(tgWebAppData))
-    const user = data.get('user')
-    if (user) {
-      try {
-        return String(JSON.parse(user).id)
-      } catch {}
-    }
+    try {
+      const data = new URLSearchParams(decodeURIComponent(tgWebAppData))
+      const user = data.get('user')
+      if (user) return String(JSON.parse(user).id)
+    } catch {}
   }
-  
-  return "805432032" // fallback для разработки
+  return "805432032"
+}
+
+function getHeaders() {
+  const initData = window.Telegram?.WebApp?.initData
+  if (initData) return { "x-telegram-init-data": initData }
+  return { "x-telegram-user-id": getUserId() }
 }
 
 export default function App() {
@@ -92,7 +88,7 @@ export default function App() {
     <div className="screen">
       <p className="error">{error}</p>
       <p style={{fontSize:"11px",padding:"10px",wordBreak:"break-all",color:"#aaa"}}>
-        initData: {getInitData() || "ПУСТО"}<br/>
+        userId: {getUserId()}<br/>
         TG: {window.Telegram?.WebApp ? "YES" : "NO"}
       </p>
     </div>
