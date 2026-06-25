@@ -6,7 +6,9 @@ import Actions from "./components/Actions"
 import "./App.css"
 
 const API = import.meta.env.VITE_API_URL || "https://api.n8nstec.ru"
-const TG = window.Telegram?.WebApp
+function getTG() {
+  return window.Telegram?.WebApp || null
+}
 
 export default function App() {
   const [pet, setPet] = useState(null)
@@ -15,15 +17,15 @@ export default function App() {
   const [action, setAction] = useState(null)
 
   useEffect(() => {
-    if (TG) {
-      TG.ready()
-      TG.expand()
+    if (getTG()) {
+      getTG().ready()
+      getTG().expand()
     }
     setTimeout(() => loadPet(), 300)
   }, [])
 
   function getHeaders() {
-    const initData = TG?.initData
+    const initData = getTG()?.initData
     return initData
       ? { "x-telegram-init-data": initData }
       : { "x-telegram-user-id": "805432032" }
@@ -56,7 +58,7 @@ export default function App() {
   async function doAction(type) {
     if (action) return
     setAction(type)
-    if (TG?.HapticFeedback) TG.HapticFeedback.impactOccurred("medium")
+    if (getTG()?.HapticFeedback) getTG().HapticFeedback.impactOccurred("medium")
     try {
       const res = await axios.post(`${API}/api/pet/${type}`, {}, { headers: getHeaders() })
       setPet(res.data)
@@ -72,9 +74,9 @@ export default function App() {
     <div className="screen">
       <p className="error">{error}</p>
       <p style={{fontSize:'11px',padding:'10px',wordBreak:'break-all',color:'#aaa'}}>
-        initData: {TG?.initData || 'ПУСТО'}<br/>
-        platform: {TG?.platform || 'unknown'}<br/>
-        TG exists: {TG ? 'YES' : 'NO'}
+        initData: {getTG()?.initData || 'ПУСТО'}<br/>
+        platform: {getTG()?.platform || 'unknown'}<br/>
+        getTG() exists: {getTG() ? 'YES' : 'NO'}
       </p>
     </div>
   )
