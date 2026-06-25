@@ -17,11 +17,18 @@ export default function App() {
   const [action, setAction] = useState(null)
 
   useEffect(() => {
-    if (getTG()) {
-      getTG().ready()
-      getTG().expand()
+  const init = () => {
+    const tg = getTG()
+    if (tg) {
+      tg.ready()
+      tg.expand()
+      loadPet()
+    } else {
+      // Telegram ещё не загрузился — ждём
+      setTimeout(init, 100)
     }
-    setTimeout(() => loadPet(), 300)
+  }
+  setTimeout(init, 200)
   }, [])
 
   function getHeaders() {
