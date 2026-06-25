@@ -69,7 +69,15 @@ export default function App() {
   }
 
   if (loading) return <div className="screen"><div className="spinner" /></div>
-  if (error) return <div className="screen"><p className="error">{error}</p></div>
+  if (error) return (
+  <div className="screen">
+    <p className="error">{error}</p>
+    <p style={{fontSize:'11px',padding:'10px',wordBreak:'break-all',color:'#aaa'}}>
+      initData: {WebApp.initData || 'ПУСТО'}<br/>
+      platform: {WebApp.platform || 'unknown'}
+    </p>
+  </div>
+  )
 
   if (!pet) return <CreatePet onCreate={createPet} />
 
