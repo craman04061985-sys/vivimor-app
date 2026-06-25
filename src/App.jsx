@@ -11,11 +11,26 @@ function getInitData() {
   return window.Telegram?.WebApp?.initData || null
 }
 
-function getHeaders() {
-  const initData = getInitData()
-  return initData
-    ? { "x-telegram-init-data": initData }
-    : { "x-telegram-user-id": "805432032" }
+function getUserId() {
+  // Пробуем window.Telegram
+  const tgId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id
+  if (tgId) return String(tgId)
+  
+  // Пробуем hash параметры URL
+  const hash = window.location.hash.slice(1)
+  const params = new URLSearchParams(hash)
+  const tgWebAppData = params.get('tgWebAppData')
+  if (tgWebAppData) {
+    const data = new URLSearchParams(decodeURIComponent(tgWebAppData))
+    const user = data.get('user')
+    if (user) {
+      try {
+        return String(JSON.parse(user).id)
+      } catch {}
+    }
+  }
+  
+  return "805432032" // fallback для разработки
 }
 
 export default function App() {
