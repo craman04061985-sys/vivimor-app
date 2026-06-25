@@ -16,16 +16,20 @@ export default function App() {
   const [error, setError] = useState(null)
   const [action, setAction] = useState(null)
 
-  useEffect(() => {
+useEffect(() => {
+  let attempts = 0
   const init = () => {
+    attempts++
     const tg = getTG()
     if (tg) {
       tg.ready()
       tg.expand()
       loadPet()
+    } else if (attempts < 20) {
+      setTimeout(init, 200)
     } else {
-      // Telegram ещё не загрузился — ждём
-      setTimeout(init, 100)
+      // Telegram недоступен — загружаем как обычно
+      loadPet()
     }
   }
   setTimeout(init, 200)
