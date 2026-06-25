@@ -5,12 +5,22 @@ import Stats from "./components/Stats"
 import Actions from "./components/Actions"
 import "./App.css"
 
-import WebApp from "@twa-dev/sdk"
-
 const API = import.meta.env.VITE_API_URL || "https://api.n8nstec.ru"
 
-function getTG() {
-  return WebApp || null
+function getInitData() {
+  // Telegram передаёт initData через window или hash
+  if (window.Telegram?.WebApp?.initData) {
+    return window.Telegram.WebApp.initData
+  }
+  // Fallback для разработки
+  return null
+}
+
+function getHeaders() {
+  const initData = getInitData()
+  return initData
+    ? { "x-telegram-init-data": initData }
+    : { "x-telegram-user-id": "805432032" }
 }
 
 export default function App() {
@@ -20,23 +30,12 @@ export default function App() {
   const [action, setAction] = useState(null)
 
 useEffect(() => {
-  let attempts = 0
-  const init = () => {
-    attempts++
-    const tg = getTG()
-    if (tg) {
-      tg.ready()
-      tg.expand()
-      loadPet()
-    } else if (attempts < 20) {
-      setTimeout(init, 200)
-    } else {
-      // Telegram недоступен — загружаем как обычно
-      loadPet()
-    }
+  if (window.Telegram?.WebApp) {
+    window.Telegram.WebApp.ready()
+    window.Telegram.WebApp.expand()
   }
-  setTimeout(init, 200)
-  }, [])
+  loadPet()
+}, [])
 
   function getHeaders() {
     const initData = getTG()?.initData
@@ -88,15 +87,14 @@ useEffect(() => {
 
   if (loading) return <div className="screen"><div className="spinner" /></div>
   if (error) return (
-    <div className="screen">
-      <p className="error">{error}</p>
-      <p style={{fontSize:'11px',padding:'10px',wordBreak:'break-all',color:'#aaa'}}>
-        initData: {getTG()?.initData || 'ПУСТО'}<br/>
-        platform: {getTG()?.platform || 'unknown'}<br/>
-        getTG() exists: {getTG() ? 'YES' : 'NO'}
-      </p>
-    </div>
-  )
+  <div className="screen">
+    <p className="error">{error}</p>
+    <p style={{fontSize:'11px',padding:'10px',wordBreak:'break-all',color:'#aaa'}}>
+      initData: {getInitData() || 'ПУСТО'}<br/>
+      TG: {window.Telegram?.WebApp ? 'YES' : 'NO'}
+    </p>
+  </div>
+)
 
   if (!pet) return <CreatePet onCreate={createPet} />
 
