@@ -46,18 +46,21 @@ useEffect(() => {
   }
 
   async function loadPet() {
-    try {
-      const res = await axios.get(`${API}/api/pet`, { headers: getHeaders() })
-      setPet(res.data)
-    } catch (e) {
-      if (e.response?.status === 404) {
-        setPet(null)
-      } else {
-        setError("Ошибка: " + (e.response?.status || e.message))
-      }
-    } finally {
-      setLoading(false)
+  try {
+    const res = await axios.get(`${API}/api/pet`, { 
+      headers: getHeaders(),
+      timeout: 5000
+    })
+    setPet(res.data)
+  } catch (e) {
+    if (e.response?.status === 404) {
+      setPet(null)
+    } else {
+      setError("Ошибка: " + (e.response?.status || e.code || e.message))
     }
+  } finally {
+    setLoading(false)
+  }
   }
 
   async function createPet(name) {
