@@ -8,12 +8,7 @@ import "./App.css"
 const API = import.meta.env.VITE_API_URL || "https://api.n8nstec.ru"
 
 function getInitData() {
-  // Telegram передаёт initData через window или hash
-  if (window.Telegram?.WebApp?.initData) {
-    return window.Telegram.WebApp.initData
-  }
-  // Fallback для разработки
-  return null
+  return window.Telegram?.WebApp?.initData || null
 }
 
 function getHeaders() {
@@ -29,37 +24,27 @@ export default function App() {
   const [error, setError] = useState(null)
   const [action, setAction] = useState(null)
 
-useEffect(() => {
-  if (window.Telegram?.WebApp) {
-    window.Telegram.WebApp.ready()
-    window.Telegram.WebApp.expand()
-  }
-  loadPet()
-}, [])
-
-  function getHeaders() {
-    const initData = getTG()?.initData
-    return initData
-      ? { "x-telegram-init-data": initData }
-      : { "x-telegram-user-id": "805432032" }
-  }
+  useEffect(() => {
+    if (window.Telegram?.WebApp) {
+      window.Telegram.WebApp.ready()
+      window.Telegram.WebApp.expand()
+    }
+    loadPet()
+  }, [])
 
   async function loadPet() {
-  try {
-    const res = await axios.get(`${API}/api/pet`, { 
-      headers: getHeaders(),
-      timeout: 5000
-    })
-    setPet(res.data)
-  } catch (e) {
-    if (e.response?.status === 404) {
-      setPet(null)
-    } else {
-      setError("Ошибка: " + (e.response?.status || e.code || e.message))
+    try {
+      const res = await axios.get(`${API}/api/pet`, { headers: getHeaders(), timeout: 8000 })
+      setPet(res.data)
+    } catch (e) {
+      if (e.response?.status === 404) {
+        setPet(null)
+      } else {
+        setError("Ошибка: " + (e.response?.status || e.code || e.message))
+      }
+    } finally {
+      setLoading(false)
     }
-  } finally {
-    setLoading(false)
-  }
   }
 
   async function createPet(name) {
@@ -74,7 +59,9 @@ useEffect(() => {
   async function doAction(type) {
     if (action) return
     setAction(type)
-    if (getTG()?.HapticFeedback) getTG().HapticFeedback.impactOccurred("medium")
+    if (window.Telegram?.WebApp?.HapticFeedback) {
+      window.Telegram.WebApp.HapticFeedback.impactOccurred("medium")
+    }
     try {
       const res = await axios.post(`${API}/api/pet/${type}`, {}, { headers: getHeaders() })
       setPet(res.data)
@@ -87,14 +74,14 @@ useEffect(() => {
 
   if (loading) return <div className="screen"><div className="spinner" /></div>
   if (error) return (
-  <div className="screen">
-    <p className="error">{error}</p>
-    <p style={{fontSize:'11px',padding:'10px',wordBreak:'break-all',color:'#aaa'}}>
-      initData: {getInitData() || 'ПУСТО'}<br/>
-      TG: {window.Telegram?.WebApp ? 'YES' : 'NO'}
-    </p>
-  </div>
-)
+    <div className="screen">
+      <p className="error">{error}</p>
+      <p style={{fontSize:"11px",padding:"10px",wordBreak:"break-all",color:"#aaa"}}>
+        initData: {getInitData() || "ПУСТО"}<br/>
+        TG: {window.Telegram?.WebApp ? "YES" : "NO"}
+      </p>
+    </div>
+  )
 
   if (!pet) return <CreatePet onCreate={createPet} />
 
